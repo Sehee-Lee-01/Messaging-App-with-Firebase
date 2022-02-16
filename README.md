@@ -1,70 +1,86 @@
-# Getting Started with Create React App
+# react_firebase
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+- ## Firebase?
+  - Google's mobile application development platform
+- ## ReactJS?
+  - A JavaScript library for building user interfaces
 
-## Available Scripts
+## Initialize
 
-In the project directory, you can run:
+---
 
-### `npm start`
+### 1) Ckeck node.js
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+node -v
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 2) Make npm
 
-### `npm test`
+```
+npm init
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 3) Make git repo.(local, remote)
 
-### `npm run build`
+```
+#local
+git init
+git add .
+git commit -m <project_name>
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#remote(Make repo in GitHub before push!)
+git remote add origin  <REMOTE_URL>
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 4) Install create-react-app & react-router-dom
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Please leave the nessesary files along new files.
 
-### `npm run eject`
+(You don't have to use files named like `.css`,`.html` etc.)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+npx create-react-app <file_name>
+npm install react-router-dom
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 5) Install & Sign in firebase
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Please sign in firebase. you do it in [https://firebase.google.com/](https://firebase.google.com/) and make your new project. Then, make `fbase` file for using firebase in `src` folder
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```
+npm install firebase --save
+```
 
-## Learn More
+**Note: Some method is not available in `firebase ver.9`**
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 6) Securing the Keys
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Make `.env` file in root, so you can hide the keys of firebase project. Then, write `.env` in `.gitignore` for hide your project keys and you can make `fbase` file like this
 
-### Code Splitting
+```javascript
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_API_KEY,
+  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_MESSAGIN_ID,
+  appId: process.env.REACT_APP_APP_ID,
+};
+initializeApp(firebaseConfig);
+export const authService = getAuth();
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 7) Router Setup
 
-### Analyzing the Bundle Size
+- cf) What is react Router used for? (from [https://www.javatpoint.com/react-router](https://www.javatpoint.com/react-router))
+  - ReactJS Router is mainly used for developing Single Page Web Applications. React Router is used to define multiple routes in the application. When a user types a specific URL into the browser, and if this URL path matches any 'route' inside the router file, the user will be redirected to that particular route.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+First, make two folder named `components` and `routes` in `src` folder.
 
-### Making a Progressive Web App
+Then, move `App.js` from root to `components` and make a file named `Router.js` to use ReactJS Router. I made this file with reference to the official 'react-router-dom' site.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+**Note: They don't have `Switch`,`Redirect` in new version!**
