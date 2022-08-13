@@ -1,8 +1,8 @@
-# react_firebase
+# Messaging-App-with-Firebase
 
-- ## Firebase?
+- ## `Firebase`?
   - Google's mobile application development platform
-- ## ReactJS?
+- ## `ReactJS`?
   - A JavaScript library for building user interfaces
 
 ## SETUP
@@ -46,7 +46,7 @@ npm install react-router-dom
 
 Please sign in firebase. you do it in [https://firebase.google.com/](https://firebase.google.com/) and make your new project. Then, make `fbase` file for using firebase in `src` folder
 
-```
+```shell
 npm install firebase --save
 ```
 
@@ -232,6 +232,26 @@ const unsubscribe = onSnapshot(q, (querySnapshot) => {
 ```
 
 ### 5) Delete and Update
+
+- `Delete` documents
+
+```javascript
+import { doc, deleteDoc } from "firebase/firestore";
+
+const MessageTextRef = doc(dbService, "collection_name", `${messageObj.id}`);
+await deleteDoc(MessageTextRef);
+```
+
+- `Update` documents
+
+```javascript
+import { doc, updateDoc } from "firebase/firestore";
+
+const MessageTextRef = doc(dbService, "collection_name", `${messageObj.id}`);
+await updateDoc(MessageTextRef, {
+  text: newMessage,
+});
+```
 
 ## FILE UPLOAD
 
