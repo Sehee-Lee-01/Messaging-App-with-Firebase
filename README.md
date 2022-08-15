@@ -2,6 +2,7 @@
 
 - ## `Firebase`?
   - Google's mobile application development platform
+  - **I focus it in this document!**
 - ## `ReactJS`?
   - A JavaScript library for building user interfaces
 
@@ -255,24 +256,188 @@ await updateDoc(MessageTextRef, {
 
 ## FILE UPLOAD
 
-### 1) Preview Images
+### 1) Using Firebase Storage
+
+```javascript
+// src/fbase.js
+import { getStorage } from "firebase/storage";
+
+/* config information */
+
+// Initialize Cloud Storage and get a reference to the service
+const storageService = getStorage(app);
+```
 
 ### 2) Uploading
 
+- `uuid`
+
+  - To save effectively image files in Storage.
+
+  cf) [uuid in npm](https://www.npmjs.com/package/uuid)
+
+  - Create a UUID
+
+```javascript
+import { v4 as uuidv4 } from "uuid";
+uuidv4(); // ⇨ '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
+```
+
+- `Upload` Files
+
+```javascript
+import { storageService } from "fbase";
+import { ref, uploadString } from "@firebase/storage";
+
+// Create a reference (Just file reference!)
+// "userObj.uid" is user id.
+const fileRef = ref(storageService, `${userObj.uid}/${v4()}`);
+
+// Put file address in string (Same as file upload method)
+// The third parameter is upload type.
+const response = await uploadString(fileRef, attachment, "data_url");
+```
+
 ### 3) File URL and Message
+
+- `Upload` a file at `Storage` and save the download URL of it at `Firestore`.
+
+```javascript
+import { getDownloadURL, ref, uploadString } from "firebase/storage";
+import { dbService, storageService } from "fbase";
+
+// After upload a file at `Storage`
+// const attachmentRef = ref(storageService, `${userObj.uid}/${uuidv4()}`);
+// const response = await uploadString(attachmentRef, attachment, "data_url");
+
+// We can take download URL
+attachmentUrl = await getDownloadURL(response.ref);
+
+// Make meaasge object for `save`
+const messageObj = {
+  text: "meaasge-info",
+  createdAt: Date.now(),
+  creatorId: userObj.uid, // user-id
+  attachmentUrl, // Download URL
+};
+
+// Save download URL at `Firestore` with file information.
+await addDoc(collection(dbService, "collection_name"), messageObj);
+```
 
 ### 4) Deleting Files
 
+```javascript
+import { dbService, storageService } from "fbase";
+import { ref, deleteObject } from "firebase/storage";
+
+// Delete the file ans its information.
+const onDeleteClick = async () => {
+  // Delete at Firestore
+  await deleteDoc(doc(dbService, `collection_name/${messageObj.id}`));
+  // Delete at Storage
+  if (messageObj.attachmentUrl !== "") {
+    await deleteObject(ref(storageService, messageObj.attachmentUrl));
+  }
+};
+```
+
 ## EDIT PROFILE
 
-### 1) Get My Own Message
+### 1) Filtering user messages in `firestore`
 
-### 2) Update Profile
+- `Query Filtering`
+
+```javascript
+import { authService, dbService } from "fbase";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+} from "firebase/firestore";
+
+// ...
+
+// Make query
+const q = query(
+  // Location of messages
+  collection(dbService, "collection_name"),
+  // Messages of "user"
+  where("creatorId", "==", userObj.uid),
+  // Order messages
+  orderBy("createdAt", "desc"),
+  // Get three messages
+  limit(3)
+);
+
+// Find messages(list) of "user" using query
+const querySnapshot = await getDocs(q);
+```
+
+### 2) Update User Profile
+
+```javascript
+import { authService } from "fbase";
+import { getAuth, updateProfile } from "firebase/auth";
+
+// Change current user information
+updateProfile(authService.currentUser, {
+  displayName: "New Name",
+  photoURL: "https://example.com/jane-q-user/profile.jpg",
+});
+```
 
 ## FINISHING UP
 
-### 1) Deploying
+### 1) Deploying (GitHub Pages)
+
+- [gh-pages](https://www.npmjs.com/package/gh-pages)
+  - Publish files to a gh-pages branch on `GitHub` (or any other branch anywhere else).
+
+```shell
+npm install gh-pages --save-dev
+```
+
+- Add Instructions in `pakage.json`
+  - `predeploy`: Make `build` folder
+  - `deploy`: Make `build` folder in local and upload homepage at URL named `"homepage"`.
+- Add our user name, repository name in homepage URL
+
+```json
+  "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+    "homepage": "https://Shee-Lee-01.github.io/messages"
+```
 
 ### 2) Security on Firebase
 
-### 3) API Key Security
+- Add A URL named `"homepage"`and `firebase domain` in `Firebase Authorized domains`
+
+  - `firebase domain` helps login process
+  - **We can make other user `log in` this message service only in this URL!**
+
+- Modify `Security Rule` of Firestore(or Storage)
+  - We can allow others CRUD when they log in.
+
+```rule
+allow read, write: if request.auth != null;
+```
+
+### 3) [`API Key`](console.developers.google.com/apis/credentials) Security
+
+- Add A URL named `"homepage"`, `localhost` and `firebase domain` in Website restrictions.
+  - **We can make other user `use` this message service only in this URL!**
+
+### 4) Firebase `Clould Functions`
+
+- It can help us make some special API using Firestore(NoSQL).
+  - We can not use `join` instruction in `Firestore`, because it is `NoSQL DB`.
+  - ex) Counting number of likes
+    - Use Functions!
+  - ex) Looking for user display name of the message by UID.
+    - Use Functions!
